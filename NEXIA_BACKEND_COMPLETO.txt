@@ -1,0 +1,62 @@
+﻿NEXIA OS - ESPECIFICAÇÃO COMPLETA DE BACKEND
+1. ARQUITETURA GERAL
+- Multi-tenant real com isolamento total de dados
+- NEXIA MASTER com acesso absoluto
+- Tenant NÃO acessa NEXIA
+- NEXIA acessa TODOS tenants
+- Firebase com regras restritivas por tenant_id
+
+2. BACKEND NEXIA (GOD MODE)
+Coleções obrigatórias:
+- tenants
+- tenant_settings
+- nexia_permissions_matrix
+- empire_metrics
+- kill_switch
+- shadow_access
+- audit_log_global
+- nexia_store
+- billing_engine
+
+Cada uma deve conter campos completos de controle, auditoria e estado.
+
+3. BACKEND CLIENTE (BASE)
+Módulos obrigatórios:
+- Builder completo (páginas, blocos, layouts)
+- CRM (leads, pipeline, automações)
+- Financeiro (transações, cobranças)
+- IA (controle de tokens)
+
+Todos os módulos devem ser funcionais e conectados ao backend.
+
+4. BUILDER (CRÍTICO)
+- Edição total do site
+- 10 layouts gratuitos
+- Troca instantânea de layout
+- Versionamento e rollback
+- Preview em tempo real
+
+5. MÓDULOS E MONETIZAÇÃO
+- 10 módulos gratuitos base
+- Módulos pagos via NEXIA Store
+- Ativação automática após pagamento
+
+6. QUALIDADE E EXECUÇÃO
+- ZERO botões fake
+- ZERO links quebrados
+- Todas telas funcionais
+- Estados: loading, erro e fallback
+
+7. TRADUÇÃO
+- Sistema i18n (PT, EN, ES)
+- Todas páginas traduzíveis
+
+8. SEGURANÇA
+- JWT seguro
+- Permissões granulares
+- Logs imutáveis
+
+9. PERFORMANCE
+- Escalável
+- Rápido
+- Sem travamentos

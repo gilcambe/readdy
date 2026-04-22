@@ -1,0 +1,185 @@
+// ===== Firebase Config — CES Brasil =====
+// Firebase Config — CES Brasil (cesbrasil-85898)
+// Projeto: https://console.firebase.google.com/project/cesbrasil-85898
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD5DaWFN16WeY6TYEHcn0IVyq8ObzHbYgY",
+  authDomain: "cesbrasil-85898.firebaseapp.com",
+  databaseURL: "https://cesbrasil-85898-default-rtdb.firebaseio.com",
+  projectId: "cesbrasil-85898",
+  storageBucket: "cesbrasil-85898.firebasestorage.app",
+  messagingSenderId: "443274031096",
+  appId: "1:443274031096:web:1ba713cbcb41178c77700d",
+  measurementId: "G-L24WSEHWXC"
+};
+
+// Uso nos formulários (REST API — sem SDK)
+const FB_API = "AIzaSyD5DaWFN16WeY6TYEHcn0IVyq8ObzHbYgY";
+const FB_PROJECT = "cesbrasil-85898";
+
+async function saveToFirebase(collection, data) {
+  await fetch(
+    `https://firestore.googleapis.com/v1/projects/${FB_PROJECT}/databases/(default)/documents/${collection}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-goog-api-key": FB_API },
+      body: JSON.stringify({
+        fields: Object.fromEntries(
+          Object.entries(data).map(([k, v]) => [k, { stringValue: String(v) }])
+        ),
+      }),
+    }
+  );
+}
+
+// ===== Firebase Config — NEXIA OS =====
+// Firebase Config — NEXIA OS (nexia-c8710)
+// Projeto: https://console.firebase.google.com/project/nexia-c8710
+
+const nexiaFirebaseConfig = {
+  apiKey: "AIzaSyC9L592zKSUjx-YglmbGpxjv2hsXm_gbBM",
+  authDomain: "nexia-c8710.firebaseapp.com",
+  projectId: "nexia-c8710",
+  storageBucket: "nexia-c8710.firebasestorage.app",
+  messagingSenderId: "623044447905",
+  appId: "1:623044447905:web:13f70e1584fb0fcf8d2ae0"
+};
+
+// Variáveis de ambiente (para .env)
+NEXT_PUBLIC_NEXIA_API_KEY=AIzaSyC9L592zKSUjx-YglmbGpxjv2hsXm_gbBM
+NEXT_PUBLIC_NEXIA_AUTH_DOMAIN=nexia-c8710.firebaseapp.com
+NEXT_PUBLIC_NEXIA_PROJECT_ID=nexia-c8710
+NEXT_PUBLIC_NEXIA_STORAGE_BUCKET=nexia-c8710.firebasestorage.app
+NEXT_PUBLIC_NEXIA_MESSAGING_SENDER_ID=623044447905
+NEXT_PUBLIC_NEXIA_APP_ID=1:623044447905:web:13f70e1584fb0fcf8d2ae0
+
+// ===== Firestore Security Rules =====
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Verifica se é o master
+    function isMaster() {
+      return exists(/databases/$(database)/documents/master_users/$(request.auth.uid));
+    }
+
+    // Obtém o tenantId do usuário logado
+    function getTenantId() {
+      return get(/databases/$(database)/documents/user_index/$(request.auth.uid)).data.tenantId;
+    }
+
+    // Regras por tenant — isolamento absoluto
+    match /tenants/{tenantId} {
+      allow read: if request.auth != null && (isMaster() || getTenantId() == tenantId);
+      allow write: if request.auth != null && (isMaster() || getTenantId() == tenantId);
+
+      // Conteúdo público (landing pages)
+      match /content/{section} {
+        allow read: if true;
+        allow write: if request.auth != null && (isMaster() || getTenantId() == tenantId);
+      }
+
+      // Cadastros — qualquer um pode criar, só admin lê/edita
+      match /cadastros/{doc} {
+        allow create: if true;
+        allow read, update, delete: if request.auth != null &&
+          (isMaster() || getTenantId() == tenantId);
+      }
+
+      // Reservas (Splash)
+      match /reservas/{doc} {
+        allow create: if true;
+        allow read, update, delete: if request.auth != null &&
+          (isMaster() || getTenantId() == tenantId);
+      }
+
+      // Leilões (Bezsan)
+      match /leiloes/{doc} {
+        allow read: if true;
+        allow write: if request.auth != null && (isMaster() || getTenantId() == tenantId);
+      }
+    }
+
+    // Audit Log — IMUTÁVEL (só criação, nunca edição/deleção)
+    match /_audit_logs/{doc} {
+      allow create: if request.auth != null;
+      allow read: if request.auth != null && isMaster();
+      allow update, delete: if false;
+    }
+  }
+}
+
+// ===== Netlify Config (_redirects) =====
+# Netlify _redirects — SPA Routing para React Router
+# Arquivo: /public/_redirects
+
+# Rota principal — todas as rotas vão para index.html
+/*    /index.html   200
+
+# Alternativa com netlify.toml:
+# [[redirects]]
+#   from = "/*"
+#   to = "/index.html"
+#   status = 200
+
+// ===== Router Config =====
+// src/router/config.tsx
+import type { RouteObject } from "react-router-dom";
+import NotFound from "../pages/NotFound";
+import Home from "../pages/home/page";
+import CESLanding from "../pages/ces/page";
+import CESAdmin from "../pages/ces/admin";
+import BeszanLanding from "../pages/bezsan/page";
+import BeszanAdmin from "../pages/bezsan/admin";
+import SplashLanding from "../pages/splash/page";
+import SplashAdmin from "../pages/splash/admin";
+import ViajanteProLanding from "../pages/viajante/page";
+import ViajanteAdmin from "../pages/viajante/admin";
+import MasterPanel from "../pages/master/page";
+import ArquitetoIA from "../pages/master/arquiteto";
+import DownloadPage from "../pages/download/page";
+
+const routes: RouteObject[] = [
+  { path: "/", element: <Home /> },
+  { path: "/ces", element: <CESLanding /> },
+  { path: "/ces/admin", element: <CESAdmin /> },
+  { path: "/bezsan", element: <BeszanLanding /> },
+  { path: "/bezsan/admin", element: <BeszanAdmin /> },
+  { path: "/splash", element: <SplashLanding /> },
+  { path: "/splash/admin", element: <SplashAdmin /> },
+  { path: "/viajante", element: <ViajanteProLanding /> },
+  { path: "/viajante/admin", element: <ViajanteAdmin /> },
+  { path: "/master", element: <MasterPanel /> },
+  { path: "/master/arquiteto", element: <ArquitetoIA /> },
+  { path: "/download", element: <DownloadPage /> },
+  { path: "*", element: <NotFound /> },
+];
+
+export default routes;
+
+// ===== Tailwind Config =====
+// tailwind.config.ts
+export default {
+  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+  theme: {
+    extend: {
+      animation: {
+        ticker: "ticker 25s linear infinite",
+        fadeIn: "fadeIn 0.5s ease",
+        spin: "spin 1s linear infinite",
+      },
+      keyframes: {
+        ticker: {
+          "0%": { transform: "translateX(0)" },
+          "100%": { transform: "translateX(-50%)" },
+        },
+        fadeIn: {
+          "0%": { opacity: "0", transform: "translateY(-8px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+      },
+    },
+  },
+  plugins: [],
+};
+
